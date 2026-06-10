@@ -20,7 +20,7 @@
 body{margin:0;padding:20px;font-family:"Hiragino Sans","Yu Gothic",sans-serif;
      background:linear-gradient(180deg,#edf5ff,#dfeeff);color:#222;}
 
-.container{max-width:620px;margin:auto;}
+.container{max-width:900px;margin:auto;}
 
   .card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.12);}
 
@@ -30,6 +30,7 @@ label{display:block;margin-top:18px;margin-bottom:6px;font-size:18px;font-weight
 
 input,
 select{width:100%;padding:14px;border-radius:14px;border:1px solid #cfd8dc;font-size:18px;background:#fff;}
+input{max-width:240px;}
 
 input:focus,
 select:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 4px rgba(25,118,210,0.15);}
@@ -56,6 +57,24 @@ select:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 4px rgba(25,
 
 .note{margin-top:10px;font-size:16px;color:#555;}
 
+.tapNote{
+display:inline-block;
+margin-bottom:12px;
+padding:6px 12px;
+
+font-size:18px;
+font-weight:bold;
+color:#222;
+
+background:
+linear-gradient(
+transparent 55%,
+#fff59d 55%
+);
+
+border-radius:6px;
+}
+
 .small{font-size:13px;font-weight:normal;}
 
 .result{margin-top:24px;padding:20px;border-radius:18px;background:#f5f9ff;
@@ -70,6 +89,80 @@ select:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 4px rgba(25,
 .safe{margin-top:16px;color:var(--safe);font-size:22px;font-weight:bold;}
 
 .footer{margin-top:20px;text-align:center;font-size:14px;color:#777;}
+
+.nppvLayout{
+display:flex;
+gap:24px;
+align-items:flex-start;
+margin-top:16px;
+}
+
+.nppvLeft{
+flex:0.8;
+min-width:220px;
+}
+
+.nppvRight{
+flex:1.2;
+min-width:320px;
+}
+
+.screenWrap{
+position:relative;
+}
+
+.screenImg{
+width:100%;
+max-width:420px;
+border-radius:14px;
+border:2px solid #ccc;
+display:block;
+}
+
+.hotspot{
+position:absolute;
+background:transparent;
+border:none;
+cursor:pointer;
+z-index:10;
+
+padding:0;
+margin:0;
+
+appearance:none;
+-webkit-appearance:none;
+
+font-size:0;
+line-height:0;
+}
+
+padding:0;
+margin:0;
+
+appearance:none;
+-webkit-appearance:none;
+
+font-size:0;
+line-height:0;
+}
+
+.hotspot:hover{
+background:transparent;
+}
+  
+.inputHighlight{
+border:3px solid #ff9800 !important;
+background:#fff8e1;
+}
+  
+@media(max-width:700px){
+
+.nppvLayout{
+flex-direction:column;
+}
+
+}
+
 
 @media(max-width:600px){
 
@@ -86,6 +179,24 @@ select:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 4px rgba(25,
 
   .quickBtns{flex-direction:column;}
 }
+
+/* 背景警告 */
+
+body.safeBg{
+background:linear-gradient(180deg,#edf5ff,#dfeeff);
+transition:0.5s;
+}
+
+body.cautionBg{
+background:linear-gradient(180deg,#fff3cd,#ffe08a);
+transition:0.5s;
+}
+
+body.dangerBg{
+background:linear-gradient(180deg,#ffcccc,#ff8a8a);
+transition:0.5s;
+}
+  
 </style>
 </head>
 
@@ -95,7 +206,7 @@ select:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 4px rgba(25,
 
   <div class="card">
 
-    <h1>酸素ボンベ計算ツール</h1>
+    <h1>酸素ボンベ計算ツール【つがる総合病院】</h1>
 
     <label>モード</label>
 
@@ -105,11 +216,32 @@ select:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 4px rgba(25,
       <option value="vent">呼吸器</option>
     </select>
 
+    <!-- NPPV機種選択 -->
+<div id="nppvMachineArea" style="display:none;margin-top:10px;">
+<label>NPPV機種選択</label>
+<select id="nppvMachine" onchange="changeNPPVMachine()">
+<option value="v60">V60</option>
+<option value="nkv">NKVｰ330</option>
+</select>
+</div>
+
+<!-- 呼吸器機種選択 -->
+<div id="ventMachineArea" style="display:none;margin-top:10px;">
+
+<label>呼吸器機種選択</label>
+
+<select id="ventMachine" onchange="changeVentMachine()">
+  <option value="servo">Servo-air</option>
+  <option value="monnal">monnal T60</option>
+</select>
+
+</div>
+
     <label>ボンベ圧（MPa）</label>
 
     <div class="inputRow">
       <input id="pressure" type="number" placeholder="例：10">
-      <img src="oxygen/pressuregauge.png" alt="圧力計" class="pressureImg">
+      <img src="pressuregauge.png" alt="圧力計" class="pressureImg">
     </div>
 
     <div class="quickBtns">
@@ -138,49 +270,148 @@ select:focus{outline:none;border-color:var(--main);box-shadow:0 0 0 4px rgba(25,
 
       <div class="inputRow">
         <input id="flow" type="number" placeholder="例：3">
-        <img src="oxygen/flowmeter.png" alt="流量計" class="flowImg">
+        <img src="flowmeter.png" alt="流量計" class="flowImg">
       </div>
 
     </div>
 
     <!-- NPPV -->
-    <div id="nppvFields" style="display:none">
+<div id="nppvFields" style="display:none;">
 
-      <label>FiO2（%）</label>
-      <input id="fio2" type="number" placeholder="例：60">
+<div class="nppvLayout">
 
-      <label>分時換気量（L/min）</label>
-      <input id="totalFlow" type="number" placeholder="例：6">
+  <!-- 左：入力欄 -->
+  <div class="nppvLeft">
 
-      <label>リーク量（L/min）</label>
-      <input id="leak" type="number" placeholder="未入力時は20">
+    <label>FiO2（%）</label>
+    <input id="fio2" type="number" placeholder="例：60">
 
+    <label>分時換気量（L/min）</label>
+    <input id="totalFlow" type="number" placeholder="例：8">
+
+    <label>リーク量（L/min）</label>
+    <input id="leak" type="number" placeholder="自動20">
+
+  </div>
+
+  <!-- 右：画像 -->
+  <div class="nppvRight">
+
+    <div class="tapNote">
+      画像の枠をタップすると入力欄へ移動します
     </div>
 
+
+<!-- V60 -->
+<div class="screenWrap" id="v60Wrap">
+
+  <img src="V60丸.png" class="screenImg">
+
+  <!-- 分時換気量 -->
+  <button class="hotspot"
+  style="top:8%;left:50%;width:20%;height:14%;"
+  onclick="focusInput('totalFlow')"></button>
+
+  <!-- リーク -->
+  <button class="hotspot"
+  style="top:15%;left:2%;width:24%;height:17%;"
+  onclick="focusInput('leak')"></button>
+
+  <!-- FiO2 -->
+  <button class="hotspot"
+  style="bottom:8%;left:20%;width:18%;height:16%;"
+  onclick="focusInput('fio2')"></button>
+
+</div>
+
+<!-- NKV -->
+<div class="screenWrap" id="nkvWrap" style="display:none;">
+
+  <img src="NKV丸.png" class="screenImg">
+
+  <!-- 分時換気量 -->
+  <button class="hotspot"
+  style="top:25%;left:3%;width:24%;height:18%;"
+  onclick="focusInput('totalFlow')"></button>
+
+  <!-- リーク -->
+  <button class="hotspot"
+  style="top:67%;left:2%;width:25%;height:15%;"
+  onclick="focusInput('leak')"></button>
+
+  <!-- FiO2 -->
+  <button class="hotspot"
+  style="bottom:1%;left:55%;width:26%;height:15%;"
+  onclick="focusInput('fio2')"></button>
+
+</div>
+
+  </div>
+
+</div>
+
+</div>
+  
     <!-- 呼吸器 -->
-    <div id="ventFields" style="display:none">
+<div id="ventFields" style="display:none;">
 
-      <label>FiO2（%）</label>
-      <input id="fio2_v" type="number" placeholder="例：60">
+<div class="nppvLayout">
 
-      <label>分時換気量（L/min）</label>
-      <input id="mv_v" type="number" placeholder="例：8">
+  <!-- 左入力 -->
+  <div class="nppvLeft">
+
+    <label>FiO2（%）</label>
+    <input id="fio2_v" type="number" placeholder="例：60">
+
+    <label>分時換気量（L/min）</label>
+    <input id="mv_v" type="number" placeholder="例：8">
+
+  </div>
+
+  <!-- 右画像 -->
+  <div class="nppvRight">
+
+    <div class="tapNote">
+      画像の枠をタップすると入力欄へ移動します
+    </div>
+
+    <!-- Servo-air -->
+    <div class="screenWrap" id="servoWrap">
+
+      <img src="air丸.png" class="screenImg">
+
+      <!-- MV -->
+      <button class="hotspot"
+      style="top:46%;left:57%;width:18%;height:22%;"
+      onclick="focusInput('mv_v')"></button>
+
+      <!-- FiO2 -->
+      <button class="hotspot"
+      style="bottom:1%;left:10%;width:14%;height:16%;"
+      onclick="focusInput('fio2_v')"></button>
 
     </div>
 
-    <button class="calc" onclick="calc()">
-      計算する
-    </button>
+    <!-- monnal -->
+    <div class="screenWrap" id="monnalWrap" style="display:none;">
 
-    <div id="result" class="result">
-      計算結果がここに表示されます
-    </div>
+      <img src="monal丸.png" class="screenImg">
 
-    <div class="footer">
-      酸素管理サポートツール
+      <!-- MV -->
+      <button class="hotspot"
+      style="top:52%;left:57%;width:20%;height:20%;"
+      onclick="focusInput('mv_v')"></button>
+
+      <!-- FiO2 -->
+      <button class="hotspot"
+      style="bottom:2%;left:1%;width:16%;height:16%;"
+      onclick="focusInput('fio2_v')"></button>
+
     </div>
 
   </div>
+
+</div>
 
 </div>
 
@@ -194,21 +425,30 @@ const mode = document.getElementById("mode");
 
 mode.addEventListener("change", () => {
 
+  // 通常酸素
   document.getElementById("normalFields").style.display =
     (mode.value === "normal") ? "block" : "none";
 
+  // NPPV機種選択
+  document.getElementById("nppvMachineArea").style.display =
+    (mode.value === "nppv") ? "block" : "none";
+
+  // NPPV本体
   document.getElementById("nppvFields").style.display =
     (mode.value === "nppv") ? "block" : "none";
 
+  // 呼吸器
   document.getElementById("ventFields").style.display =
     (mode.value === "vent") ? "block" : "none";
+  // 呼吸器機種選択
+document.getElementById("ventMachineArea").style.display =
+  (mode.value === "vent") ? "block" : "none";
 
 });
 
 function setPressureAndCalc(value){
 
   document.getElementById("pressure").value = value;
-  calc();
 
 }
 
@@ -294,23 +534,55 @@ function calc(){
   let time = usable / flow;
 
   let status = "";
+  let exchange = "";
 
+  // 背景色リセット
+  document.body.classList.remove(
+    "safeBg",
+    "cautionBg",
+    "dangerBg"
+  );
+
+  // 危険
   if(time < 10){
 
     status =
       "<div class='warn'>⚠ 危険（10分未満）</div>";
 
+    exchange =
+      "<div class='warn'>至急交換してください</div>";
+
+    document.body.classList.add("dangerBg");
+
   }
+
+  // 注意
   else if(time < 20){
 
     status =
       "<div class='warn'>⚠ 注意（20分未満）</div>";
 
+    exchange =
+      `<div class='warn'>
+      あと ${Math.round(time - 5)} 分以内に交換推奨
+      </div>`;
+
+    document.body.classList.add("cautionBg");
+
   }
+
+  // 安全
   else{
 
     status =
       "<div class='safe'>✔ 使用可能</div>";
+
+    exchange =
+      `<div class='safe'>
+      約 ${Math.round(time - 10)} 分後に交換準備推奨
+      </div>`;
+
+    document.body.classList.add("safeBg");
 
   }
 
@@ -325,10 +597,85 @@ function calc(){
     </div>
 
     ${status}
+
+    ${exchange}
     `;
 }
 
+function changeNPPVMachine(){
+
+let machine =
+document.getElementById("nppvMachine").value;
+
+document.getElementById("v60Wrap").style.display = "none";
+document.getElementById("nkvWrap").style.display = "none";
+
+if(machine === "v60"){
+document.getElementById("v60Wrap").style.display = "block";
+}
+
+if(machine === "nkv"){
+document.getElementById("nkvWrap").style.display = "block";
+}
+
+}
+
+function focusInput(id){
+
+document.querySelectorAll("input").forEach(el=>{
+el.classList.remove("inputHighlight");
+});
+
+document.getElementById(id).focus();
+
+document.getElementById(id).classList.add("inputHighlight");
+
+document.getElementById(id).scrollIntoView({
+behavior:"smooth",
+block:"center"
+});
+
+}
+
+changeNPPVMachine();
+
+function changeVentMachine(){
+
+let machine =
+document.getElementById("ventMachine").value;
+
+document.getElementById("servoWrap").style.display = "none";
+document.getElementById("monnalWrap").style.display = "none";
+
+if(machine === "servo"){
+document.getElementById("servoWrap").style.display = "block";
+}
+
+if(machine === "monnal"){
+document.getElementById("monnalWrap").style.display = "block";
+}
+
+}
+
+changeVentMachine();  
+
 </script>
 
+<button class="calc" onclick="calc()">
+  計算する
+</button>
+
+<div id="result" class="result">
+  計算結果がここに表示されます
+</div>
+
+<div class="footer">
+  酸素ボンベ管理ツール
+</div>
+
+  </div>
+
+</div>
+  
 </body>
 </html>
